@@ -1,0 +1,8 @@
+{
+  "name": "clipboard-copy-hook",
+  "version": "1.0.0",
+  "description": "add hook mechanism on clipboard copy event",
+  "main": "lib/clipboard.js",
+  "author": "Shinichi Tomita <shinichi.tomita@gmail.com>",
+  "license": "MIT"
+}
