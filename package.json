@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "add hook mechanism on clipboard copy event",
   "main": "lib/clipboard.js",
+  "scripts": {
+    "lint": "eslint src/",
+    "build": "babel -d lib/ src/"
+  },
   "author": "Shinichi Tomita <shinichi.tomita@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "^6.3.26",
+    "babel-cli": "^6.4.5",
+    "babel-eslint": "^4.1.6",
+    "babel-preset-es2015": "^6.3.13",
+    "eslint": "^1.10.3"
+  }
 }
