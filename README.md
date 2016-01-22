@@ -37,7 +37,8 @@ const clipboard = new Clipboard();
 const el = document.getElementById('container');
 el.addEventListener('keydown', (e) => {
   // Pass the keydown event to detect OS native keyboard shortcut event
-  clipboard.handleKeyDownEvent(e, (e) => e.target);
+  const itemEl = e.target;
+  clipboard.handleKeyDownEvent(e, itemEl);
 });
 
 // Called when Ctrl(Command)+C or Ctrl(Command)+X key is pressed
