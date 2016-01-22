@@ -4,13 +4,21 @@
   "description": "Add hook mechanism on native clipboard cupt/copy/paste event",
   "main": "lib/clipboard.js",
   "scripts": {
-    "postinstall": "webdriver-manager update",
     "lint": "eslint src/",
-    "build": "babel -d lib/ src/",
+    "build:lib": "babel -d lib/ src/",
+    "build:dist": "npm run build:dist:dev && npm run build:dist:prod",
+    "build:dist:dev": "browserify -t babelify --standalone Clipboard -o dist/clipboard.js src/clipboard-cjs.js",
+    "build:dist:prod": "cat dist/clipboard.js | uglifyjs > dist/clipboard.min.js",
+    "build": "npm run build:lib && npm run build:dist",
     "start:testServer": "babel-node test/server/server.js",
-    "pretest": "npm run build",
-    "test": "protractor"
+    "pretest": "webdriver-manager update && npm run build",
+    "test": "protractor",
+    "prepublish": "npm run build"
   },
+  "files": [
+    "lib",
+    "dist"
+  ],
   "author": "Shinichi Tomita <shinichi.tomita@gmail.com>",
   "license": "MIT",
   "devDependencies": {
@@ -29,6 +37,7 @@
     "express": "^4.13.3",
     "phantomjs": "^1.9.19",
     "power-assert": "^1.2.0",
-    "protractor": "^3.0.0"
+    "protractor": "^3.0.0",
+    "uglify-js": "^2.6.1"
   }
 }
