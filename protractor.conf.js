@@ -7,6 +7,8 @@ require('babel-core/register')({
 
 require('babel-polyfill');
 
+var port = process.env.PORT || 9000;
+
 exports.config = {
   //
   onPrepare: function() {
@@ -26,7 +28,7 @@ exports.config = {
   },
 
   // url where your app is running, relative URLs are prepending with this URL
-  baseUrl: 'http://localhost:9000/',
+  baseUrl: 'http://localhost:' + port + '/',
 
   // testing framework, jasmine is the default
   framework: 'mocha'
