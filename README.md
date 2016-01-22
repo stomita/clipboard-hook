@@ -6,7 +6,30 @@ Adding a hook mechanism on OS native clipboard event (e.g. copy/cut/paste).
 
 ## Usage
 
-```es6
+
+```html:index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+#container .black { background-color: black; color: white; }
+#container .red { background-color: red; color: white; }
+#container .blue { background-color: blue; color: white; }
+#container .yellow { background-color: yellow; color: black; }
+    </style>
+  </head>
+  <body>
+    <ul id="container">
+      <li class="blue" tabIndex="0">Sky</li>
+      <li class="red" tabIndex="0">Blood</li>
+      <li class="yellow" tabIndex="0">Banana</li>
+    </ul>
+    <script src="app.js"></script>
+  </body>
+</html>
+```
+
+```es6:app.js
 import Clipboard from './clipboard';
 
 const clipboard = new Clipboard();
