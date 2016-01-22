@@ -8,7 +8,7 @@ el.addEventListener('keydown', (e) => {
 });
 
 clipboard.on('copy', (itemEl) => {
-  var textData = itemEl.innerHTML;
+  var textData = itemEl.textContent;
   var data = { name: textData, color: itemEl.className };
   clipboard.set({ data, textData });
 });
@@ -20,10 +20,10 @@ clipboard.on('delete', (itemEl) => {
 clipboard.on('paste', ({ data, textData }, itemEl) => {
   var newItemEl = itemEl.cloneNode(true);
   if (data) {
-    newItemEl.innerHTML = data.name;
+    newItemEl.textContent = data.name;
     newItemEl.className = data.color;
   } else {
-    newItemEl.innerHTML = textData;
+    newItemEl.textContent = textData;
     newItemEl.className = 'black';
   }
   itemEl.parentNode.insertBefore(newItemEl, itemEl.nextSibling);
