@@ -4,7 +4,7 @@
   "description": "Add hook mechanism on native clipboard cupt/copy/paste event",
   "main": "lib/clipboard.js",
   "scripts": {
-    "clean": "rm lib/*.js && rm dist/*.js",
+    "clean": "rm -f lib/*.js && rm -f dist/*.js",
     "lint": "eslint src/",
     "build:lib": "babel -d lib/ src/",
     "build:dist": "npm run build:dist:dev && npm run build:dist:prod",
