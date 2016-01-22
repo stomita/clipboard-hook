@@ -1,7 +1,14 @@
 /* global: document */
+import { EventEmitter } from 'events';
 
-export default class Clipboard {
+export const KEY_X = 88;
+export const KEY_C = 67;
+export const KEY_V = 86;
+export const KEY_DEL = 46;
+
+export default class Clipboard extends EventEmitter {
   constructor(namespace = '', containerEl = document.body) {
+    super();
     this.id = '_clipboard_fake_' + namespace;
     this.containerEl = containerEl;
     this.doc = containerEl.ownerDocument;
@@ -9,9 +16,10 @@ export default class Clipboard {
 
   findClipboardElement() {
     const containerEl = this.containerEl;
-    let clipboardEl = containerEl.getElementById(this.id);
+    let clipboardEl = this.doc.getElementById(this.id);
     if (!clipboardEl) {
       clipboardEl = this.doc.createElement('textarea');
+      clipboardEl.id = this.id;
       clipboardEl.style.position = 'absolute';
       clipboardEl.style.width = clipboardEl.style.height = 0;
       clipboardEl.style.top = clipboardEl.style.left = '-10000px';
@@ -21,32 +29,76 @@ export default class Clipboard {
     return clipboardEl;
   }
 
-  save(data, textData, callback) {
-    const clipboardEl = this.findClipboardElement();
-    this.data = data;
-    clipboardEl.value = textData;
-    const activeEl = doc.activeElement;
-    clipboardEl.focus();
-    clipboardEl.select();
-    setTimeout(() => {
-      if (activeEl) { activeEl.focus(); }
-      callback();
-    }, 100);
-  }
-
   get() {
     const clipboardEl = this.findClipboardElement();
     return { data: this.data, textData: clipboardEl.value };
   }
 
-  load(callback) {
+  set({ data, textData }) {
+    this.data = data;
+    const clipboardEl = this.findClipboardElement();
+    clipboardEl.value = textData;
+  }
+
+  _save(callback) {
+    const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
     const lastTextData = clipboardEl.value;
+    clipboardEl.focus();
+    clipboardEl.select();
     setTimeout(() => {
-      const textData = clipboardEl.value;
-      const data = lastTextData === textData ? this.data : undefined;
-      callback(null, { data, textData });
+      clipboardEl.value = lastTextData;
+      if (activeEl) { activeEl.focus(); }
+      if (callback) { callback(); }
     }, 100);
+  }
+
+  _load(callback) {
+    const activeEl = this.doc.activeElement;
+    const clipboardEl = this.findClipboardElement();
+    const lastTextData = clipboardEl.value;
+    clipboardEl.focus();
+    clipboardEl.select();
+    setTimeout(() => {
+      if (activeEl) { activeEl.focus(); }
+      const { data: currentData, textData } = this.get();
+      const data = lastTextData === textData ? currentData : undefined;
+      const value = { data, textData };
+      this.set(value);
+      if (callback) { callback(null, value) }
+    }, 100);
+  }
+
+  handleShortcutKeyDown(e, ...args) {
+    if (e.ctrlKey || e.metaKey) {
+      const keyCode = e.keyCode;
+      switch(keyCode) {
+        case KEY_C:
+        case KEY_X:
+          this.emit('copy', e, ...args);
+          this._save((err) => {
+            if (err) {
+              this.emit('error', err);
+            } else {
+              if (keyCode === KEY_X) {
+                this.emit('delete', e, ...args);
+              }
+            }
+          });
+          break;
+        case KEY_V:
+          this._load((err, value) => {
+            if (err) { this.emit('error', err); }
+            else { this.emit('paste', value, ...args); }
+          });
+          break;
+        case KEY_DEL:
+          this.emit('delete', e, ...args);
+          break;
+        default:
+          break;
+      }
+    }
   }
 
 }
