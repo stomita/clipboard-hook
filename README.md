@@ -1,5 +1,7 @@
 # Clipboard Hook
 
+[![Build Status](https://travis-ci.org/stomita/clipboard-hook.svg?branch=master)](https://travis-ci.org/stomita/clipboard-hook)
+
 Adding a hook mechanism on OS native clipboard event (e.g. copy/cut/paste).
 
 ## Usage
