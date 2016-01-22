@@ -4,6 +4,7 @@
   "description": "Add hook mechanism on native clipboard cupt/copy/paste event",
   "main": "lib/clipboard.js",
   "scripts": {
+    "clean": "rm lib/*.js && rm dist/*.js",
     "lint": "eslint src/",
     "build:lib": "babel -d lib/ src/",
     "build:dist": "npm run build:dist:dev && npm run build:dist:prod",
@@ -13,7 +14,7 @@
     "start:testServer": "babel-node test/server/server.js",
     "pretest": "webdriver-manager update && npm run build:lib",
     "test": "protractor",
-    "prepublish": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "files": [
     "lib",
