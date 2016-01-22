@@ -7,7 +7,7 @@ Adding a hook mechanism on OS native clipboard event (e.g. copy/cut/paste).
 ## Usage
 
 
-```html:index.html
+```html
 <!DOCTYPE html>
 <html>
   <head>
@@ -29,7 +29,7 @@ Adding a hook mechanism on OS native clipboard event (e.g. copy/cut/paste).
 </html>
 ```
 
-```es6:app.js
+```es6
 import Clipboard from './clipboard';
 
 const clipboard = new Clipboard();
