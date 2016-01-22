@@ -35,6 +35,7 @@
     "browserify-middleware": "^7.0.0",
     "eslint": "^1.10.3",
     "express": "^4.13.3",
+    "mocha": "^2.3.4",
     "phantomjs": "^1.9.19",
     "power-assert": "^1.2.0",
     "protractor": "^3.0.0",
