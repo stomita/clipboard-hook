@@ -30,7 +30,7 @@ Adding a hook mechanism on OS native clipboard event (e.g. copy/cut/paste).
 ```
 
 ```es6
-import Clipboard from './clipboard';
+import Clipboard from 'clipboard-hook';
 
 const clipboard = new Clipboard();
 
