@@ -11,7 +11,7 @@
     "build:dist:prod": "cat dist/clipboard.js | uglifyjs > dist/clipboard.min.js",
     "build": "npm run build:lib && npm run build:dist",
     "start:testServer": "babel-node test/server/server.js",
-    "pretest": "webdriver-manager update && npm run build",
+    "pretest": "webdriver-manager update && npm run build:lib",
     "test": "protractor",
     "prepublish": "npm run build"
   },

@@ -1,21 +1,19 @@
 import Clipboard from '../../..';
 
-console.log(Clipboard);
-
 const clipboard = new Clipboard();
 
 const el = document.getElementById('container');
 el.addEventListener('keydown', (e) => {
-  clipboard.handleShortcutKeyDown(e, e.target);
+  clipboard.handleKeyDownEvent(e, (e) => e.target);
 });
 
-clipboard.on('copy', (e, itemEl) => {
+clipboard.on('copy', (itemEl) => {
   var textData = itemEl.innerHTML;
   var data = { name: textData, color: itemEl.className };
   clipboard.set({ data, textData });
 });
 
-clipboard.on('delete', (e, itemEl) => {
+clipboard.on('delete', (itemEl) => {
   itemEl.parentNode.removeChild(itemEl);
 });
 

@@ -69,31 +69,34 @@ export default class Clipboard extends EventEmitter {
     }, 100);
   }
 
-  handleShortcutKeyDown(e, ...args) {
+  handleKeyDownEvent(e, context) {
     if (e.ctrlKey || e.metaKey) {
       const keyCode = e.keyCode;
       switch(keyCode) {
         case KEY_C:
         case KEY_X:
-          this.emit('copy', e, ...args);
+          context = typeof context === 'function' ? context(e) : context;
+          this.emit('copy', context);
           this._save((err) => {
             if (err) {
               this.emit('error', err);
             } else {
               if (keyCode === KEY_X) {
-                this.emit('delete', e, ...args);
+                this.emit('delete', context);
               }
             }
           });
           break;
         case KEY_V:
+          context = typeof context === 'function' ? context(e) : context;
           this._load((err, value) => {
             if (err) { this.emit('error', err); }
-            else { this.emit('paste', value, ...args); }
+            else { this.emit('paste', value, context); }
           });
           break;
         case KEY_DEL:
-          this.emit('delete', e, ...args);
+          context = typeof context === 'function' ? context(e) : context;
+          this.emit('delete', context);
           break;
         default:
           break;
