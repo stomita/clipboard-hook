@@ -1,10 +1,11 @@
 /* global: document */
 import { EventEmitter } from 'events';
 
-export const KEY_X = 88;
-export const KEY_C = 67;
-export const KEY_V = 86;
-export const KEY_DEL = 46;
+const KEY_X = 88;
+const KEY_C = 67;
+const KEY_V = 86;
+const KEY_DEL = 46;
+const KEY_BACKSPACE = 8;
 
 export default class Clipboard extends EventEmitter {
   constructor(namespace = '', containerEl = document.body) {
@@ -70,37 +71,46 @@ export default class Clipboard extends EventEmitter {
   }
 
   handleKeyDownEvent(e, context) {
-    if (e.ctrlKey || e.metaKey) {
-      const keyCode = e.keyCode;
-      switch(keyCode) {
-        case KEY_C:
-        case KEY_X:
-          context = typeof context === 'function' ? context(e) : context;
-          this.emit('copy', context);
+    const keyCode = e.keyCode;
+    const getContext = typeof context === 'function' ? context : () => context;
+    let ctx;
+    switch(keyCode) {
+      case KEY_C:
+      case KEY_X:
+        if (e.ctrlKey || e.metaKey) {
+          ctx = getContext(e);
+          this.emit('copy', ctx);
           this._save((err) => {
             if (err) {
               this.emit('error', err);
             } else {
               if (keyCode === KEY_X) {
-                this.emit('delete', context);
+                this.emit('delete', ctx);
               }
             }
           });
-          break;
-        case KEY_V:
-          context = typeof context === 'function' ? context(e) : context;
+        }
+        break;
+      case KEY_V:
+        if (e.ctrlKey || e.metaKey) {
+          ctx = getContext(e);
           this._load((err, value) => {
             if (err) { this.emit('error', err); }
-            else { this.emit('paste', value, context); }
+            else { this.emit('paste', value, ctx); }
           });
-          break;
-        case KEY_DEL:
-          context = typeof context === 'function' ? context(e) : context;
-          this.emit('delete', context);
-          break;
-        default:
-          break;
-      }
+        }
+        break;
+      case KEY_DEL:
+      case KEY_BACKSPACE:
+        if (this.listeners('delete').length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          ctx = getContext(e);
+          this.emit('delete', ctx);
+        }
+        break;
+      default:
+        break;
     }
   }
 

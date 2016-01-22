@@ -62,6 +62,35 @@ describe('clipboard', function() {
     assert(count === 2);
   });
 
+  it('should cut an item', async () => {
+    await browser.get('/');
+    let count = await $$('#container div.red').count();
+    assert(count === 1);
+    let item = $$('#container div.red').first();
+    await item.click();
+    await item.sendKeys(Key.chord(Key.CONTROL, 'x'));
+    await browser.sleep(OP_INTERVAL);
+    count = await $$('#container div.red').count();
+    assert(count === 0);
+    item = $$('#container div').first();
+    await item.sendKeys(Key.chord(Key.CONTROL, 'v'));
+    await browser.sleep(OP_INTERVAL);
+    count = await $$('#container div.red').count();
+    assert(count === 1);
+  });
+
+  it('should delete an item', async () => {
+    await browser.get('/');
+    let count = await $$('#container div.blue').count();
+    assert(count === 1);
+    let item = $$('#container div.blue').first();
+    await item.click();
+    await item.sendKeys(Key.DELETE);
+    await browser.sleep(OP_INTERVAL);
+    count = await $$('#container div.blue').count();
+    assert(count === 0);
+  });
+
   after(() => {
     server.close();
   });
