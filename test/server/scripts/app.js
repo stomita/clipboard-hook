@@ -4,7 +4,8 @@ const clipboard = new Clipboard();
 
 const el = document.getElementById('container');
 el.addEventListener('keydown', (e) => {
-  clipboard.handleKeyDownEvent(e, (e) => e.target);
+  const itemEl = e.target;
+  clipboard.handleKeyDownEvent(e, itemEl);
 });
 
 clipboard.on('copy', (itemEl) => {
