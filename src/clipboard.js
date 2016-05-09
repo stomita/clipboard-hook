@@ -32,10 +32,12 @@ export default class Clipboard extends EventEmitter {
 
   get() {
     const clipboardEl = this.findClipboardElement();
-    return { data: this.data, textData: clipboardEl.value };
+    const textData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
+    return { data: this.data, textData };
   }
 
   set({ data, textData }) {
+    if (textData === "") { textData = "\t"; }
     this.data = data;
     const clipboardEl = this.findClipboardElement();
     clipboardEl.value = textData;
@@ -44,7 +46,7 @@ export default class Clipboard extends EventEmitter {
   _save(callback) {
     const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
-    const lastTextData = clipboardEl.value;
+    const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
     clipboardEl.focus();
     clipboardEl.select();
     setTimeout(() => {
@@ -57,7 +59,7 @@ export default class Clipboard extends EventEmitter {
   _load(callback) {
     const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
-    const lastTextData = clipboardEl.value;
+    const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
     clipboardEl.focus();
     clipboardEl.select();
     setTimeout(() => {
