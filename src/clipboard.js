@@ -7,6 +7,8 @@ const KEY_V = 86;
 const KEY_DEL = 46;
 const KEY_BACKSPACE = 8;
 
+const CLIP_EVENT_DELAY_MSEC = 100;
+
 export default class Clipboard extends EventEmitter {
   constructor(namespace = '', containerEl = document.body) {
     super();
@@ -22,11 +24,12 @@ export default class Clipboard extends EventEmitter {
       clipboardEl = this.doc.createElement('textarea');
       clipboardEl.id = this.id;
       clipboardEl.style.position = 'absolute';
-      clipboardEl.style.width = clipboardEl.style.height = 0;
-      clipboardEl.style.top = clipboardEl.style.left = '-10000px';
+      clipboardEl.style.width = clipboardEl.style.height = '0';
       clipboardEl.style.opacity = 0;
       containerEl.appendChild(clipboardEl);
     }
+    clipboardEl.style.top = (this.containerEl.scrollTop + 8) + 'px';
+    clipboardEl.style.left = (this.containerEl.scrollLeft + 8) + 'px';
     return clipboardEl;
   }
 
@@ -53,7 +56,7 @@ export default class Clipboard extends EventEmitter {
       clipboardEl.value = lastTextData;
       if (activeEl) { activeEl.focus(); }
       if (callback) { callback(); }
-    }, 100);
+    }, CLIP_EVENT_DELAY_MSEC);
   }
 
   _load(callback) {
@@ -69,7 +72,7 @@ export default class Clipboard extends EventEmitter {
       const value = { data, textData };
       this.set(value);
       if (callback) { callback(null, value) }
-    }, 100);
+    }, CLIP_EVENT_DELAY_MSEC);
   }
 
   handleKeyDownEvent(e, context) {
