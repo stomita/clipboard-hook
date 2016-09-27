@@ -1,6 +1,6 @@
 'use strict';
 
-require('babel-core/register')({
+require('babel-register')({
   presets: ['es2015'],
   plugins: ['syntax-async-functions','transform-regenerator','espower']
 });
