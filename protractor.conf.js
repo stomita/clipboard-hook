@@ -1,10 +1,11 @@
 'use strict';
 
 require('babel-register')({
-  presets: ['es2015'],
-  plugins: ['syntax-async-functions','transform-regenerator','espower']
+  presets: ['es2017'],
+  plugins: [
+    ['espower', { "embedAst": true }],
+  ],
 });
-
 require('babel-polyfill');
 
 var port = process.env.PORT || 9000;
