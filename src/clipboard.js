@@ -15,6 +15,8 @@ export default class Clipboard extends EventEmitter {
     this.id = '_clipboard_fake_' + namespace;
     this.containerEl = containerEl;
     this.doc = containerEl.ownerDocument;
+    this.supportCopyCommand =
+      this.doc.queryCommandSupported && this.doc.queryCommandSupported('copy');
   }
 
   findClipboardElement() {
@@ -46,12 +48,19 @@ export default class Clipboard extends EventEmitter {
     clipboardEl.value = textData;
   }
 
+  _execCopy() {
+    if (this.supportCopyCommand) {
+      this.doc.execCommand('copy');
+    }
+  }
+
   _save(callback) {
     const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
     const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
     clipboardEl.focus();
     clipboardEl.select();
+    this._execCopy(); // execute if command is possible. Otherwise OS handles the copy event.
     setTimeout(() => {
       clipboardEl.value = lastTextData;
       if (activeEl) { activeEl.focus(); }
