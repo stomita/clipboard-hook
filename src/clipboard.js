@@ -76,6 +76,11 @@ export default class Clipboard extends EventEmitter {
     clipboardEl.select();
     // it seems that Chrome browser may delay the focus if active element is referenced
     const newActiveEl = this.doc.activeElement;
+    // following logic should be always false
+    // this is intended in order to prevent the activeElement reference code being removed by the code optimization
+    if (newActiveEl !== clipboardEl) {
+      clipboardEl.focus();
+    }
     setTimeout(() => {
       if (activeEl) { activeEl.focus(); }
       const { data: currentData, textData } = this.get();
