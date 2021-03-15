@@ -10,13 +10,23 @@ const KEY_BACKSPACE = 8;
 const CLIP_EVENT_DELAY_MSEC = 100;
 
 export default class Clipboard extends EventEmitter {
-  constructor(namespace = '', containerEl = document.body) {
+  constructor(namespace = '', containerEl = document.body, options = {}) {
     super();
     this.id = '_clipboard_fake_' + namespace;
     this.containerEl = containerEl;
     this.doc = containerEl.ownerDocument;
     this.supportCopyCommand =
       this.doc.queryCommandSupported && this.doc.queryCommandSupported('copy');
+    this.useNativeClipboardEvent = options.useNativeClipboardEvent;
+  }
+
+  listenEvents(el, context) {
+    el.addEventListener('keydown', (e) => this.handleKeyDownEvent(e, context));
+    if (this.useNativeClipboardEvent) {
+      el.addEventListener('cut', (e) => this.handleClipboardCutEvent(e, context));
+      el.addEventListener('copy', (e) => this.handleClipboardCopyEvent(e, context));
+      el.addEventListener('paste', (e) => this.handleClipboardPasteEvent(e, context));
+    }
   }
 
   findClipboardElement() {
@@ -54,7 +64,15 @@ export default class Clipboard extends EventEmitter {
     }
   }
 
-  _save(callback) {
+  _save(e, callback) {
+    if (e.type === 'keydown') {
+      this._saveInKeydownEvent(callback);
+    } else {
+      this._saveInCopyEvent(e, callback);
+    }
+  }
+
+  _saveInKeydownEvent(callback) {
     const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
     const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
@@ -68,7 +86,31 @@ export default class Clipboard extends EventEmitter {
     }, CLIP_EVENT_DELAY_MSEC);
   }
 
-  _load(callback) {
+  _saveInCopyEvent(e, callback) {
+    const clipboardEl = this.findClipboardElement();
+    const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
+    const copyingText = clipboardEl.value;
+    if (e.clipboardData) {
+      e.clipboardData.setData('text/plain', copyingText);
+    } else if (window.clipboardData) {
+      window.clipboardData.setData('Text', copyingText);
+    }
+    e.preventDefault();
+    setTimeout(() => {
+      clipboardEl.value = lastTextData;
+      if (callback) { callback(); }
+    }, CLIP_EVENT_DELAY_MSEC);
+  }
+
+  _load(e, callback) {
+    if (e.type === 'keydown') {
+      this._loadInKeydownEvent(callback);
+    } else {
+      this._loadInPasteEvent(e, callback);
+    }
+  }
+
+  _loadInKeydownEvent(callback) {
     const activeEl = this.doc.activeElement;
     const clipboardEl = this.findClipboardElement();
     const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
@@ -91,44 +133,85 @@ export default class Clipboard extends EventEmitter {
     }, CLIP_EVENT_DELAY_MSEC);
   }
 
+  _loadInPasteEvent(e, callback) {
+    const clipboardEl = this.findClipboardElement();
+    const lastTextData = clipboardEl.value === "\t" ? "" : clipboardEl.value;
+    let pastingText = lastTextData;
+    if (e.clipboardData) {
+      pastingText = e.clipboardData.getData('text/plain');
+    } else if (window.clipboardData) {
+      pastingText = window.clipboardData.getData('Text');
+    }
+    e.preventDefault();
+    clipboardEl.value = pastingText;
+    setTimeout(() => {
+      const { data: currentData, textData } = this.get();
+      const data = lastTextData === textData ? currentData : undefined;
+      const value = { data, textData };
+      this.set(value);
+      if (callback) { callback(null, value) }
+    }, CLIP_EVENT_DELAY_MSEC);
+  }
+
+  handleClipboardCutEvent(e, context) {
+    this.handleClipboardCopyEvent(e, context, true);
+  }
+
+  handleClipboardCopyEvent(e, context, isCut = false) {
+    const getContext = typeof context === 'function' ? context : () => context;
+    const ctx = getContext(e);
+    this.emit('copy', ctx);
+    this._save(e, (err) => {
+      if (err) {
+        this.emit('error', err);
+      } else {
+        if (isCut) {
+          this.emit('delete', ctx);
+        }
+      }
+    });
+  }
+
+  handleClipboardPasteEvent(e, context) {
+    const getContext = typeof context === 'function' ? context : () => context;
+    const ctx = getContext(e);
+    this._load(e, (err, value) => {
+      if (err) { this.emit('error', err); }
+      else { this.emit('paste', value, ctx); }
+    });
+  }
+
+  handleDeleteEvent(e, context) {
+    const getContext = typeof context === 'function' ? context : () => context;
+    if (this.listeners('delete').length > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      const ctx = getContext(e);
+      this.emit('delete', ctx);
+    }
+  }
+
   handleKeyDownEvent(e, context) {
     const keyCode = e.keyCode;
-    const getContext = typeof context === 'function' ? context : () => context;
-    let ctx;
     switch(keyCode) {
       case KEY_C:
       case KEY_X:
         if (e.ctrlKey || e.metaKey) {
-          ctx = getContext(e);
-          this.emit('copy', ctx);
-          this._save((err) => {
-            if (err) {
-              this.emit('error', err);
-            } else {
-              if (keyCode === KEY_X) {
-                this.emit('delete', ctx);
-              }
-            }
-          });
+          if (!this.useNativeClipboardEvent) {
+            this.handleClipboardCopyEvent(e, context, keyCode === KEY_X);
+          }
         }
         break;
       case KEY_V:
         if (e.ctrlKey || e.metaKey) {
-          ctx = getContext(e);
-          this._load((err, value) => {
-            if (err) { this.emit('error', err); }
-            else { this.emit('paste', value, ctx); }
-          });
+          if (!this.useNativeClipboardEvent) {
+            this.handleClipboardPasteEvent(e, context);
+          }
         }
         break;
       case KEY_DEL:
       case KEY_BACKSPACE:
-        if (this.listeners('delete').length > 0) {
-          e.preventDefault();
-          e.stopPropagation();
-          ctx = getContext(e);
-          this.emit('delete', ctx);
-        }
+        this.handleDeleteEvent(e, context);
         break;
       default:
         break;
