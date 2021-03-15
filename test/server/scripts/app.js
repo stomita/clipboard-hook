@@ -3,10 +3,7 @@ import Clipboard from '../../..';
 const clipboard = new Clipboard();
 
 const el = document.getElementById('container');
-el.addEventListener('keydown', (e) => {
-  const itemEl = e.target;
-  clipboard.handleKeyDownEvent(e, itemEl);
-});
+clipboard.listenEvents(el, (e) => e.target);
 
 clipboard.on('copy', (itemEl) => {
   var textData = itemEl.textContent;
@@ -20,6 +17,7 @@ clipboard.on('delete', (itemEl) => {
 
 clipboard.on('paste', ({ data, textData }, itemEl) => {
   var newItemEl = itemEl.cloneNode(true);
+  newItemEl.contentEditable = true;
   if (data) {
     newItemEl.textContent = data.name;
     newItemEl.className = data.color;
